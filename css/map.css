@@ -1,0 +1,369 @@
+/* ==========================================================================
+   CROWDSENSE — INTERACTIVE MAP STYLING
+   ========================================================================== */
+
+/* Wrapper that owns the height budget for the map + its overlays */
+.map-viewport-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+  margin: 0 -1.1rem;      /* bleed to card edges */
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  overflow: hidden;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  background: radial-gradient(circle at 50% 50%, #0d1527 0%, #080c16 100%);
+  overflow: hidden;
+  border: none;           /* viewport-wrapper owns the border */
+  user-select: none;
+  cursor: grab;
+}
+.map-container:active {
+  cursor: grabbing;
+}
+
+/* Background Blueprint Grid */
+.map-grid-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+
+/* SVG Floorplan Element */
+.floorplan-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Canvas Particle Overlay (Simulated Moving People) */
+.particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Architectural Zones Styling */
+.mall-zone {
+  cursor: pointer;
+  transition: fill 0.4s ease, stroke 0.3s ease, filter 0.3s ease;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Default Density Fill States */
+.mall-zone.density-low {
+  fill: rgba(16, 185, 129, 0.22);
+  stroke: #10b981;
+  stroke-width: 1.5;
+}
+.mall-zone.density-moderate {
+  fill: rgba(245, 158, 11, 0.24);
+  stroke: #f59e0b;
+  stroke-width: 1.5;
+}
+.mall-zone.density-high {
+  fill: rgba(249, 115, 22, 0.28);
+  stroke: #f97316;
+  stroke-width: 2;
+}
+.mall-zone.density-critical {
+  fill: rgba(239, 68, 68, 0.35);
+  stroke: #ef4444;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+  animation: zone-critical-pulse 2s infinite ease-in-out;
+}
+
+@keyframes zone-critical-pulse {
+  0% { fill: rgba(239, 68, 68, 0.28); }
+  50% { fill: rgba(239, 68, 68, 0.48); }
+  100% { fill: rgba(239, 68, 68, 0.28); }
+}
+
+/* Zone Hover & Active Highlights */
+.mall-zone:hover {
+  fill-opacity: 0.85;
+  filter: drop-shadow(0 0 12px var(--accent-cyan));
+  stroke: #ffffff;
+  stroke-width: 2.5;
+}
+
+.mall-zone.selected-zone {
+  stroke: #00f0ff !important;
+  stroke-width: 3 !important;
+  filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.75)) !important;
+}
+
+/* Zone Labels & Occupancy Badges */
+.zone-text-label {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  fill: #ffffff;
+  text-anchor: middle;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+  letter-spacing: 0.3px;
+}
+
+.zone-sub-label {
+  font-family: var(--font-main);
+  font-size: 10px;
+  font-weight: 600;
+  fill: #cbd5e1;
+  text-anchor: middle;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+}
+
+.zone-badge-bg {
+  rx: 10;
+  ry: 10;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+}
+.zone-badge-text {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  fill: #ffffff;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* Corridor / Walkway Architecture */
+.corridor-path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.corridor-centerline {
+  fill: none;
+  stroke: rgba(6, 182, 212, 0.2);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+/* Waypoint Nodes */
+.waypoint-node {
+  fill: #1e293b;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.waypoint-node:hover {
+  fill: var(--accent-cyan);
+  stroke: #ffffff;
+  r: 7;
+}
+
+/* Navigation Route Overlay */
+.nav-route-underglow {
+  fill: none;
+  stroke: rgba(6, 182, 212, 0.3);
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: blur(4px);
+}
+
+.nav-route-active {
+  fill: none;
+  stroke: var(--accent-cyan);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 10 6;
+  animation: route-flow-animation 1.2s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.8));
+}
+.nav-route-active.least-crowded {
+  stroke: var(--density-low);
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));
+}
+
+@keyframes route-flow-animation {
+  from {
+    stroke-dashoffset: 32;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.nav-pin-start, .nav-pin-end {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6));
+  animation: pin-bounce 1s ease infinite alternate;
+}
+@keyframes pin-bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+/* Map Floating On-Screen Controls */
+.map-floating-controls {
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 20;
+}
+.map-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+.map-ctrl-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+/* Map Floating Overlays (Layers Toggle & Legend) */
+.map-floating-legend {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.legend-color-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.legend-color-dot.low { background: var(--density-low); box-shadow: 0 0 6px var(--density-low); }
+.legend-color-dot.mod { background: var(--density-mod); box-shadow: 0 0 6px var(--density-mod); }
+.legend-color-dot.high { background: var(--density-high); box-shadow: 0 0 6px var(--density-high); }
+.legend-color-dot.crit { background: var(--density-critical); box-shadow: 0 0 6px var(--density-critical); }
+
+.map-layer-toggles {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 20;
+}
+.layer-toggle-pill {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all var(--transition-fast);
+}
+.layer-toggle-pill.active {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+/* Hover HUD / Tooltip */
+.map-hover-hud {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--accent-cyan);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.85rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(6, 182, 212, 0.3);
+  display: none;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 170px;
+  transform: translate(-50%, -120%);
+  transition: opacity 0.15s ease;
+}
+.hud-zone-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.hud-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.hud-val {
+  font-weight: 700;
+  color: #f8fafc;
+  font-family: var(--font-mono);
+}
+
+/* Emergency Exit Markers */
+.exit-marker {
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+  transition: transform var(--transition-fast);
+}
+.exit-marker:hover {
+  transform: scale(1.15);
+}
