@@ -416,7 +416,47 @@
           </div>
         </aside>
       </section>
-    </main>
+    <!-- RASPBERRY PI PICO HARDWARE PANEL -->
+<div class="panel-card">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <i class="fa-solid fa-microchip" style="color:var(--accent-purple);"></i>
+      <strong style="font-size:0.95rem;">Raspberry Pi Pico — Digital Twin Hub</strong>
+      <span id="picoGateBadge" style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#10b981; margin-left:0.5rem;">ENTRY GATE: OPEN</span>
+    </div>
+    <div style="display:flex; gap:0.4rem;">
+      <button id="picoConnectBtn" class="btn-primary-action" style="padding:0.4rem 0.75rem;">Connect Pico</button>
+      <button id="picoGateToggleBtn" class="level-btn">Toggle Entry Gate</button>
+    </div>
+  </div>
+
+  <p id="picoStatusText" style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.75rem;">Plug Pico into USB, stop Thonny, and click Connect Pico.</p>
+
+  <div class="inspector-stats-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="mini-stat-card">
+      <div class="mini-stat-label">MQ-2 Smoke/Gas</div>
+      <div id="picoGasVal" class="mini-stat-val" style="color:#06b6d4;">-- ppm</div>
+    </div>
+    <div class="mini-stat-card">
+      <div class="mini-stat-label">DHT11 Humidity</div>
+      <div id="picoHumVal" class="mini-stat-val" style="color:#8b5cf6;">--%</div>
+    </div>
+    <div class="mini-stat-card">
+      <div class="mini-stat-label">HW-611 Temp</div>
+      <div id="picoTempVal" class="mini-stat-val" style="color:#10b981;">--°C</div>
+    </div>
+    <div class="mini-stat-card">
+      <div class="mini-stat-label">HW-611 Pressure</div>
+      <div id="picoPressVal" class="mini-stat-val" style="color:#38bdf8;">-- hPa</div>
+    </div>
+    <div class="mini-stat-card">
+      <div class="mini-stat-label">IR Flame Sensors</div>
+      <div id="picoFlameVal" class="mini-stat-val" style="color:#10b981;">CLEAR</div>
+    </div>
+  </div>
+</div>
+
+</main>
   </div>
 
   <!-- NOTIFICATIONS DRAWER -->
@@ -492,5 +532,6 @@
   <script src="../js/analytics.js"></script>
   <script src="../js/camera.js"></script>
   <script src="../js/main.js"></script>
+  <script src="../js/pico.js"></script>
 </body>
 </html>
